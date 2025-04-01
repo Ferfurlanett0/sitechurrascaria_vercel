@@ -30,7 +30,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative h-screen">
         <div className="absolute inset-0">
-          <img src="/img/picanha fundo.svg" alt="Traditional Brazilian Churrasco" className="w-full h-full object-cover" />
+          <img src="/img/picanha fundo.png" alt="Traditional Brazilian Churrasco" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/60" />
         </div>
         
