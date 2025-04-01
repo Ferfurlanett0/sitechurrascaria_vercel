@@ -1,0 +1,100 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 28 22% 91%;
+  --foreground: 20 14.3% 4.1%;
+  
+  --primary: 15 80.7% 50%;
+  --primary-foreground: 60 9.1% 97.8%;
+  
+  --secondary: 20 14.3% 4.1%;
+  --secondary-foreground: 60 9.1% 97.8%;
+  
+  --accent: 12 60% 45%;
+  --accent-foreground: 60 9.1% 97.8%;
+  
+  --muted: 12 6.5% 15.1%;
+  --muted-foreground: 24 5.4% 63.9%;
+  
+  --card: 20 14.3% 4.1%;
+  --card-foreground: 60 9.1% 97.8%;
+  
+  --popover: 60 9.1% 97.8%;
+  --popover-foreground: 20 14.3% 4.1%;
+  
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --ring: 20 14.3% 4.1%;
+  
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scroll-behavior: smooth;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-poppins;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair font-bold;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-md font-medium transition-colors hover:bg-accent;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white px-6 py-3 rounded-md font-medium transition-colors hover:bg-muted;
+  }
+  
+  .heading-xl {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold;
+  }
+  
+  .heading-lg {
+    @apply text-3xl md:text-4xl font-bold;
+  }
+  
+  .heading-md {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+  
+  .menu-item {
+    @apply flex flex-col gap-1 mb-4;
+  }
+  
+  .menu-title {
+    @apply font-semibold text-lg;
+  }
+  
+  .menu-description {
+    @apply text-sm text-muted-foreground;
+  }
+  
+  .menu-price {
+    @apply text-primary font-medium;
+  }
+}
