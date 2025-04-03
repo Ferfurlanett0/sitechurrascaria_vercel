@@ -13,15 +13,15 @@ const Menu = () => {
           <div className="menu-item">
             <div className="flex justify-between">
               <span className="menu-title">Buffet Completo</span>
-              <span className="menu-price">R$59,90</span>
+              <span className="menu-price">R$41,90</span>
             </div>
-            <p className="menu-description">Buffet à vontade com variedade de saladas, acompanhamentos e pratos quentes</p>
+            <p className="menu-description">Buffet à vontade com variedade de saladas, acompanhamentos, pratos quentes e carne assada a vontade</p>
           </div>
           
           <div className="menu-item">
             <div className="flex justify-between">
-              <span className="menu-title">Comida por Kilo</span>
-              <span className="menu-price">R$69,90/kg</span>
+              <span className="menu-title">Almoço por kilo</span>
+              <span className="menu-price">R$89,99/kg</span>
             </div>
             <p className="menu-description">Monte seu prato com nossas opções variadas e pague pelo peso</p>
           </div>
@@ -40,10 +40,10 @@ const Menu = () => {
           
           <div className="menu-item">
             <div className="flex justify-between">
-              <span className="menu-title">Buffet + Churrasco</span>
-              <span className="menu-price">R$79,90</span>
+              <span className="menu-title">Carne Assada por kilo</span>
+              <span className="menu-price">R$99,99/kg</span>
             </div>
-            <p className="menu-description">Buffet completo com rodízio de carnes especiais</p>
+            <p className="menu-description">Escolha qualquer tipo de carne disponível na churrasqueira do dia e leve para saborear. A carne é servida em uma marmita, pesando apenas a quantidade escolhida</p>
           </div>
         </div>
       </div>
@@ -55,25 +55,25 @@ const Menu = () => {
           <div className="menu-item">
             <div className="flex justify-between">
               <span className="menu-title">Marmitex Pequeno</span>
-              <span className="menu-price">R$18,90</span>
+              <span className="menu-price">R$20,00</span>
             </div>
-            <p className="menu-description">Arroz, feijão, uma opção de carne e dois acompanhamentos</p>
+            <p className="menu-description">Arroz, feijão ou feijoada, macarrão, farofa, refogado de legumes e carne de churrasco misto (porco, boi e frango)</p>
           </div>
           
           <div className="menu-item">
             <div className="flex justify-between">
               <span className="menu-title">Marmitex Médio</span>
-              <span className="menu-price">R$25,90</span>
+              <span className="menu-price">R$23,00</span>
             </div>
-            <p className="menu-description">Arroz, feijão, uma opção de carne e três acompanhamentos</p>
+            <p className="menu-description">Arroz, feijão ou feijoada, macarrão, farofa, refogado de legumes e carne de churrasco misto (porco, boi e frango)</p>
           </div>
           
           <div className="menu-item">
             <div className="flex justify-between">
               <span className="menu-title">Marmitex Grande</span>
-              <span className="menu-price">R$32,90</span>
+              <span className="menu-price">R$28,00</span>
             </div>
-            <p className="menu-description">Arroz, feijão, duas opções de carne e três acompanhamentos</p>
+            <p className="menu-description">Arroz, feijão ou feijoada, macarrão, farofa, refogado de legumes, carne de churrasco misto (porco, boi e frango) e salada</p>
           </div>
         </div>
         
@@ -82,18 +82,18 @@ const Menu = () => {
           
           <div className="menu-item">
             <div className="flex justify-between">
-              <span className="menu-title">PF Tradicional</span>
+              <span className="menu-title">Prato Executivo</span>
               <span className="menu-price">R$29,90</span>
             </div>
-            <p className="menu-description">Arroz, feijão, bife, ovo frito, batata frita e salada</p>
+            <p className="menu-description">Acompanha um prato quente, um prato de salada e um prato de carne assada</p>
           </div>
           
           <div className="menu-item">
             <div className="flex justify-between">
-              <span className="menu-title">PF Gaúcho</span>
-              <span className="menu-price">R$34,90</span>
+              {/* <span className="menu-title">PF Gaúcho</span> */}
+              {/* <span className="menu-price">R$34,90</span> */}
             </div>
-            <p className="menu-description">Arroz, feijão, picanha, farofa, vinagrete e mandioca frita</p>
+            {/* <p className="menu-description">Acompanha um prato quente, um prato de salada e um prato de carne assada</p> */}
           </div>
         </div>
       </div>
