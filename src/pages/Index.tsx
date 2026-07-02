@@ -1,13 +1,28 @@
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ChevronDown, MapPin, Clock, Utensils, Star, MessageSquare } from "lucide-react";
+import { ChevronDown, MapPin, Clock, Utensils, Star, MessageSquare, Volume2, VolumeX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Verifica se o restaurante está aberto (Segunda a Sábado, 11:00 às 14:00)
+  const agora = new Date();
+  const dia = agora.getDay();
+  const hora = agora.getHours();
+  const isOpen = dia >= 1 && dia <= 6 && hora >= 11 && hora < 14;
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.15;
+    }
+  }, []);
+
   const handleWhatsAppClick = () => {
     window.open("https://wa.me/551936711191?text=Olá! Gostaria de fazer uma reserva no Novo Tempero Gaúcho.", "_blank");
   };
@@ -30,8 +45,61 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative h-screen">
         <div className="absolute inset-0">
-          <img src="/img/picanha fundo.png" alt="Traditional Brazilian Churrasco" className="w-full h-full object-cover" />
+          <video 
+            ref={videoRef}
+            src="/img/Video fundo picanha.mp4" 
+            autoPlay 
+            loop 
+            muted={isMuted} 
+            playsInline 
+            className="w-full h-full object-cover transition-opacity duration-700" 
+            onTimeUpdate={(e) => {
+              const video = e.currentTarget;
+              // Smooth loop trick: fade slightly right before the end
+              if (video.duration && video.duration - video.currentTime < 0.4) {
+                video.style.opacity = '0.7';
+              } else {
+                video.style.opacity = '1';
+              }
+            }}
+          />
           <div className="absolute inset-0 bg-black/60" />
+          
+          {/* Elemento decorativo maior para esconder a marca d'água e conter o botão de som */}
+          <div className="absolute bottom-0 right-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 backdrop-blur-xl pl-16 pr-12 pt-16 pb-10 rounded-tl-[4rem] border-t border-l border-white/10 shadow-2xl scale-[1.10] origin-bottom-right">
+            {/* Avaliação */}
+            <div className="flex flex-col items-center gap-1 opacity-90">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((_, i) => (
+                  <Star key={i} size={12} className="text-primary fill-primary" />
+                ))}
+              </div>
+              <span className="text-white/80 text-[10px] font-medium tracking-wider">4.9/5 Google</span>
+            </div>
+            
+            {/* Título */}
+            <div className="text-center">
+              <span className="block text-white text-lg font-bold tracking-widest uppercase">Tempero Gaúcho</span>
+              <span className="block text-primary/90 text-[11px] tracking-widest uppercase mt-1">Tradição desde 1997</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-3 mt-1">
+              {/* Status */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+                 <div className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                 <span className="text-white/80 text-[10px] uppercase tracking-widest">{isOpen ? 'Aberto' : 'Fechado'}</span>
+              </div>
+              
+              {/* Volume */}
+              <button 
+                onClick={() => setIsMuted(!isMuted)}
+                className="p-2 bg-white/10 rounded-full text-white/80 hover:text-white hover:bg-primary transition-all flex items-center justify-center"
+                title={isMuted ? "Ativar som ambiente" : "Desativar som ambiente"}
+              >
+                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className="relative container-custom h-full flex flex-col justify-center items-center text-center text-white">
@@ -119,7 +187,7 @@ const Index = () => {
               </div>
               <div className="flex justify-between mb-3">
                 <h4 className="text-xl font-semibold">Buffet</h4>
-                <span className="text-primary font-bold">R$41,90</span>
+                <span className="text-primary font-bold">R$47,90</span>
               </div>
               <p className="text-gray-300 mb-4">
               Oferecemos um buffet à vontade, incluindo carnes  assadas na churrasqueira, onde os clientes podem escolher entre 8 a 10 cortes variados.
