@@ -3,13 +3,153 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ChevronDown, MapPin, Clock, Utensils, Star, MessageSquare, Volume2, VolumeX } from "lucide-react";
+import { ChevronDown, MapPin, Clock, Utensils, Star, MessageSquare, Volume2, VolumeX, Flame, Beef, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
+import EmberParticles from "../components/EmberParticles";
+import MeatCutsGuide from "../components/MeatCutsGuide";
+
+const TOTAL_FRAMES = 40;
+const frameUrls = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
+  `/img/Parallax carne caindo/ezgif-frame-${(i + 1).toString().padStart(3, '0')}.png`
+);
+
+// Desenha imagem no canvas simulando object-fit: cover com ponto focal central
+const drawCover = (
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  cw: number,
+  ch: number,
+  focalX = 0.5,
+  focalY = 0.45
+) => {
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const canvasRatio = cw / ch;
+  const imgRatio = iw / ih;
+
+  let sw: number, sh: number, sx: number, sy: number;
+
+  if (imgRatio > canvasRatio) {
+    sh = ih;
+    sw = ih * canvasRatio;
+    sx = (iw - sw) * focalX;
+    sy = 0;
+  } else {
+    sw = iw;
+    sh = iw / canvasRatio;
+    sx = 0;
+    sy = (ih - sh) * focalY;
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+};
+
+const ScrollAnimation = ({ sectionRef }: { sectionRef: React.RefObject<HTMLElement> }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const currentFrameRef = useRef(0);
+
+  // Pre-load todas as imagens
+  useEffect(() => {
+    const images: HTMLImageElement[] = [];
+    let loaded = 0;
+
+    frameUrls.forEach((url, i) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        loaded++;
+        setLoadedCount(loaded);
+      };
+      images[i] = img;
+    });
+
+    imagesRef.current = images;
+  }, []);
+
+  // Ajusta o canvas ao tamanho da section inteira
+  useEffect(() => {
+    const resize = () => {
+      if (!canvasRef.current || !sectionRef.current) return;
+      const { width, height } = sectionRef.current.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvasRef.current.width = width * dpr;
+      canvasRef.current.height = height * dpr;
+
+      const img = imagesRef.current[currentFrameRef.current];
+      if (img && img.complete) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) drawCover(ctx, img, canvasRef.current.width, canvasRef.current.height);
+      }
+    };
+
+    resize();
+    const observer = new ResizeObserver(resize);
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [loadedCount, sectionRef]);
+
+  // Scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current || !canvasRef.current) return;
+      const { top, height } = sectionRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      const scrolled = windowHeight - top;
+      const distance = windowHeight + height;
+
+      let progress = scrolled / distance;
+      const start = 0.15;
+      const end = 0.80;
+      let normalized = (progress - start) / (end - start);
+      if (normalized < 0) normalized = 0;
+      if (normalized > 1) normalized = 1;
+
+      const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.floor(normalized * TOTAL_FRAMES));
+
+      if (frameIndex !== currentFrameRef.current) {
+        currentFrameRef.current = frameIndex;
+        const img = imagesRef.current[frameIndex];
+        if (img && img.complete) {
+          const ctx = canvasRef.current.getContext('2d');
+          if (ctx) drawCover(ctx, img, canvasRef.current.width, canvasRef.current.height);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadedCount, sectionRef]);
+
+  const isLoading = loadedCount < TOTAL_FRAMES;
+
+  return (
+    <>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+      />
+      {isLoading && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50 z-20">
+          <div
+            className="h-full bg-primary/80 transition-all duration-300"
+            style={{ width: `${(loadedCount / TOTAL_FRAMES) * 100}%` }}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
 
 const Index = () => {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const aboutRef = useRef<HTMLElement>(null);
 
   // Verifica se o restaurante está aberto (Segunda a Sábado, 11:00 às 14:00)
   const agora = new Date();
@@ -63,7 +203,12 @@ const Index = () => {
               }
             }}
           />
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/40" />
+          {/* Efeito de vignette (bordas escuras) e fusão com o fundo dark mode */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_30%,_rgba(0,0,0,0.8)_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
+          
+          <EmberParticles />
           
           {/* Elemento decorativo maior para esconder a marca d'água e conter o botão de som */}
           <div className="absolute bottom-0 right-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 backdrop-blur-xl pl-16 pr-12 pt-16 pb-10 rounded-tl-[4rem] border-t border-l border-white/10 shadow-2xl scale-[1.10] origin-bottom-right">
@@ -113,7 +258,7 @@ const Index = () => {
             <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={() => scrollToSection("menu-section")}>
               Ver Cardápio
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-black hover:bg-white/10" onClick={handleWhatsAppClick}>
+            <Button size="lg" variant="outline" className="border-white/60 text-white hover:bg-white/10 hover:border-white" onClick={handleWhatsAppClick}>
               Fazer Reserva
             </Button>
           </div>
@@ -126,43 +271,90 @@ const Index = () => {
         </div>
       </section>
       
-      {/* About Section */}
-      <section id="about" className="py-24 bg-background">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="heading-md mb-6 text-primary">Nossa História</h2>
-              <h3 className="heading-lg mb-8">Uma Tradição de Sabor e Qualidade</h3>
-              <p className="text-lg mb-6">
+      {/* A Arte do Tempero Gaúcho (Diferenciais) */}
+      <section className="py-24 bg-secondary relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="container-custom relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-primary tracking-widest uppercase text-sm font-bold mb-3">Nosso Diferencial</h2>
+            <h3 className="heading-lg text-white">A Arte do Tempero Gaúcho</h3>
+            <div className="w-24 h-1 bg-primary mx-auto mt-6 rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-black/40 border border-white/5 hover:bg-black/60 transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:bg-primary/20">
+                <Flame size={32} className="text-primary" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-4 font-playfair">Tempero Autoral</h4>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Nossa receita exclusiva e guardada a sete chaves, criada pelo próprio fundador, que garante um sabor inconfundível que você só encontra aqui.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-black/40 border border-white/5 hover:bg-black/60 transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:bg-primary/20">
+                <Beef size={32} className="text-primary" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-4 font-playfair">Cortes Nobres</h4>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Seleção rigorosa das melhores carnes, com foco em maciez, marmoreio e suculência para entregar o churrasco perfeito na sua mesa.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-black/40 border border-white/5 hover:bg-black/60 transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:bg-primary/20">
+                <Award size={32} className="text-primary" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-4 font-playfair">Serviço de Excelência</h4>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Atendimento caloroso e atencioso. Tratamos cada cliente como parte da família, criando uma experiência inesquecível do início ao fim.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* About Section — Cinemático com Scroll Animation como fundo */}
+      <section id="about" className="relative min-h-screen overflow-hidden bg-black" ref={aboutRef}>
+        {/* Canvas de fundo full-width */}
+        <ScrollAnimation sectionRef={aboutRef} />
+        
+        {/* Overlay escuro gradiente da esquerda para leitura */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent pointer-events-none z-[1]" />
+        {/* Vinheta topo e base para fusão com seções adjacentes */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background pointer-events-none z-[1]" />
+        
+        {/* Conteúdo sobreposto */}
+        <div className="container-custom relative z-10 py-32">
+          <div className="max-w-xl">
+            <h2 className="text-primary tracking-widest uppercase text-sm font-bold mb-4">Nossa História</h2>
+            <h3 className="heading-lg mb-8 text-white">Uma Tradição de Sabor e Qualidade</h3>
+            <p className="text-lg mb-6 text-white/80 leading-relaxed">
               Desde 1997, o Tempero Gaúcho mantém a tradição de um churrasco autêntico e um buffet completo. Ao longo dos anos, passamos por três locais diferentes até chegarmos ao espaço atual, sempre buscando oferecer conforto e qualidade.
-              </p>
-              <p className="text-lg mb-8">
+            </p>
+            <p className="text-lg mb-10 text-white/80 leading-relaxed">
               Servimos um buffet à vontade, com diversas opções, e carnes assadas na churrasqueira, preparadas com o tempero especial da casa, criado pelo próprio dono. Uma receita única que garante sabor e tradição em cada corte.
-              Aqui, cada detalhe é pensado para que sua experiência seja inesquecível!
-              </p>
-              <div className="flex flex-wrap gap-8">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Utensils size={24} className="text-primary" />
-                  </div>
-                  <span className="font-medium">Ingredientes Selecionados</span>
+            </p>
+            <div className="flex flex-wrap gap-8">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/20 p-3 rounded-full">
+                  <Utensils size={24} className="text-primary" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Star size={24} className="text-primary" />
-                  </div>
-                  <span className="font-medium">Excelência em Serviço</span>
+                <span className="font-medium text-white">Ingredientes Selecionados</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/20 p-3 rounded-full">
+                  <Star size={24} className="text-primary" />
                 </div>
+                <span className="font-medium text-white">Excelência em Serviço</span>
               </div>
             </div>
-            <div className="relative">
-              <div className="rounded-lg overflow-hidden shadow-xl">
-                <img src="https://images.unsplash.com/photo-1615937657715-bc7b4b7962c1?q=80&w=800&auto=format&fit=crop" alt="Chef preparando churrasco" className="w-full h-[500px] object-cover" />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg hidden md:block">
-                <p className="text-xl font-playfair text-primary font-bold">28+</p>
-                <p className="text-sm">Anos de Experiência</p>
-              </div>
+            
+            <div className="mt-10 inline-flex items-center gap-4 bg-black/40 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10">
+              <p className="text-4xl font-playfair text-primary font-bold">28+</p>
+              <div className="w-px h-10 bg-white/20" />
+              <p className="text-sm uppercase tracking-widest text-white/70">Anos de<br/>Tradição</p>
             </div>
           </div>
         </div>
@@ -181,44 +373,44 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Menu Item 1 */}
-            <div className="bg-black/20 rounded-lg p-6 hover:bg-black/30 transition-colors">
-              <div className="mb-4">
-                <img src="/img/richo.png" alt="Buffet" className="w-full h-64 object-cover rounded-lg" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-white/5 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,87,34,0.15)] group">
+              <div className="mb-6 overflow-hidden rounded-xl">
+                <img src="/img/richo.png" alt="Buffet" className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="flex justify-between mb-3">
-                <h4 className="text-xl font-semibold">Buffet</h4>
-                <span className="text-primary font-bold">R$47,90</span>
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-2xl font-playfair font-bold text-white">Buffet Livre</h4>
+                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-bold border border-primary/20">R$47,90</span>
               </div>
-              <p className="text-gray-300 mb-4">
-              Oferecemos um buffet à vontade, incluindo carnes  assadas na churrasqueira, onde os clientes podem escolher entre 8 a 10 cortes variados.
+              <p className="text-muted-foreground leading-relaxed">
+                Oferecemos um buffet à vontade, incluindo carnes assadas na churrasqueira, onde os clientes podem escolher entre 8 a 10 cortes variados.
               </p>
             </div>
             
             {/* Menu Item 2 */}
-            <div className="bg-black/20 rounded-lg p-6 hover:bg-black/30 transition-colors">
-              <div className="mb-4">
-                <img src="/img/sobremesa.png" alt="Sobremesa" className="w-full h-64 object-cover rounded-lg" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-white/5 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,87,34,0.15)] group">
+              <div className="mb-6 overflow-hidden rounded-xl">
+                <img src="/img/sobremesa.png" alt="Sobremesa" className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="flex justify-between mb-3">
-                <h4 className="text-xl font-semibold">Sobremesas à vontade</h4>
-                <span className="text-primary font-bold">INCLUSO</span>
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-2xl font-playfair font-bold text-white">Sobremesas</h4>
+                <span className="bg-white/5 text-white/80 px-3 py-1 rounded-full font-bold border border-white/10 uppercase text-xs tracking-wider">Incluso</span>
               </div>
-              <p className="text-gray-300 mb-4">
-              Delicie-se com uma variedade de sobremesas inclusas no buffet, garantindo um final perfeito para sua refeição.
+              <p className="text-muted-foreground leading-relaxed">
+                Delicie-se com uma variedade de sobremesas deliciosas inclusas no buffet, garantindo um final perfeito para sua refeição.
               </p>
             </div>
             
             {/* Menu Item 3 */}
-            <div className="bg-black/20 rounded-lg p-6 hover:bg-black/30 transition-colors">
-              <div className="mb-4">
-                <img src="/img/cafe.png" alt="Churrasco Misto" className="w-full h-64 object-cover rounded-lg" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-white/5 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,87,34,0.15)] group">
+              <div className="mb-6 overflow-hidden rounded-xl">
+                <img src="/img/cafe.png" alt="Café" className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="flex justify-between mb-3">
-                <h4 className="text-xl font-semibold">Café de cortesia</h4>
-                <span className="text-primary font-bold">INCLUSO</span>
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-2xl font-playfair font-bold text-white">Café Premium</h4>
+                <span className="bg-white/5 text-white/80 px-3 py-1 rounded-full font-bold border border-white/10 uppercase text-xs tracking-wider">Cortesia</span>
               </div>
-              <p className="text-gray-300 mb-4">
-              Após a refeição, oferecemos um café de cortesia para tornar sua experiência ainda mais agradável.
+              <p className="text-muted-foreground leading-relaxed">
+                Após a refeição, oferecemos um café fresquinho de cortesia para tornar sua experiência ainda mais agradável.
               </p>
             </div>
           </div>
@@ -245,18 +437,24 @@ const Index = () => {
             <CarouselContent>
               {/* Real Google Review 1 */}
               <CarouselItem>
-                <Card className="bg-white p-4 rounded-lg shadow-md">
-                  <CardContent className="pt-4 text-center">
-                    <div className="flex justify-center mb-4">
+                <Card className="bg-secondary/50 border-white/5 p-8 rounded-2xl shadow-xl relative overflow-hidden">
+                  <div className="absolute top-4 right-6 text-primary/10 font-playfair text-9xl leading-none">"</div>
+                  <CardContent className="pt-4 text-center relative z-10">
+                    <div className="flex justify-center mb-6">
                       {[1, 2, 3, 4, 5].map(star => <Star key={star} size={20} className="text-primary fill-primary" />)}
                     </div>
-                    <p className="text-lg italic mb-6 text-zinc-950">
+                    <p className="text-xl md:text-2xl font-playfair italic mb-8 text-white/90">
                       "Ambiente agradável, comida deliciosa, preço justo e atendimento excelente. A feijoada de sábado é simplesmente maravilhosa! Recomendo fortemente!"
                     </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <p className="font-semibold text-zinc-950">Ricardo Oliveira</p>
-                      <MessageSquare size={16} className="text-primary" />
-                      <span className="text-sm text-gray-500">Google Reviews</span>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">R</div>
+                      <div className="text-left">
+                        <p className="font-bold text-white">Ricardo Oliveira</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare size={12} className="text-primary" />
+                          <span>Google Reviews</span>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -264,18 +462,24 @@ const Index = () => {
               
               {/* Real Google Review 2 */}
               <CarouselItem>
-                <Card className="bg-white p-4 rounded-lg shadow-md">
-                  <CardContent className="pt-4 text-center">
-                    <div className="flex justify-center mb-4">
+                <Card className="bg-secondary/50 border-white/5 p-8 rounded-2xl shadow-xl relative overflow-hidden">
+                  <div className="absolute top-4 right-6 text-primary/10 font-playfair text-9xl leading-none">"</div>
+                  <CardContent className="pt-4 text-center relative z-10">
+                    <div className="flex justify-center mb-6">
                       {[1, 2, 3, 4, 5].map(star => <Star key={star} size={20} className="text-primary fill-primary" />)}
                     </div>
-                    <p className="text-lg italic mb-6 text-zinc-950">
-                      "Minha família adora vir aqui! A carne é sempre muito bem preparada, suculenta e saborosa. O buffet tem muita variedade e tudo muito fresco. Sempre saímos satisfeitos."
+                    <p className="text-xl md:text-2xl font-playfair italic mb-8 text-white/90">
+                      "Minha família adora vir aqui! A carne é sempre muito bem preparada, suculenta e saborosa. O buffet tem muita variedade e tudo fresco. Sempre saímos satisfeitos."
                     </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <p className="font-semibold text-zinc-950">Márcia Santos</p>
-                      <MessageSquare size={16} className="text-primary" />
-                      <span className="text-sm text-gray-500">Google Reviews</span>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">M</div>
+                      <div className="text-left">
+                        <p className="font-bold text-white">Márcia Santos</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare size={12} className="text-primary" />
+                          <span>Google Reviews</span>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -283,19 +487,25 @@ const Index = () => {
               
               {/* Real Google Review 3 */}
               <CarouselItem>
-                <Card className="bg-white p-4 rounded-lg shadow-md">
-                  <CardContent className="pt-4 text-center">
-                    <div className="flex justify-center mb-4">
+                <Card className="bg-secondary/50 border-white/5 p-8 rounded-2xl shadow-xl relative overflow-hidden">
+                  <div className="absolute top-4 right-6 text-primary/10 font-playfair text-9xl leading-none">"</div>
+                  <CardContent className="pt-4 text-center relative z-10">
+                    <div className="flex justify-center mb-6">
                       {[1, 2, 3, 4].map(star => <Star key={star} size={20} className="text-primary fill-primary" />)}
                       <Star size={20} className="text-primary" />
                     </div>
-                    <p className="text-lg italic mb-6 text-zinc-950">
-                      "Ótima opção para almoço de negócios ou com a família. Preço justo pelo que oferece. O marmitex grande dá para duas pessoas tranquilamente. Recomendo o prato feito executivo nos dias de semana."
+                    <p className="text-xl md:text-2xl font-playfair italic mb-8 text-white/90">
+                      "Ótima opção para almoço de negócios ou com a família. Preço justo pelo que oferece. O marmitex grande dá para duas pessoas tranquilamente."
                     </p>
-                    <div className="flex items-center justify-center gap-2">
-                      <p className="font-semibold text-zinc-950">José Carlos Pereira</p>
-                      <MessageSquare size={16} className="text-primary" />
-                      <span className="text-sm text-gray-500">Google Reviews</span>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">J</div>
+                      <div className="text-left">
+                        <p className="font-bold text-white">José Carlos Pereira</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare size={12} className="text-primary" />
+                          <span>Google Reviews</span>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -304,7 +514,7 @@ const Index = () => {
           </Carousel>
 
           <div className="text-center mt-8">
-            <Button variant="outline" className="mt-4" onClick={handleShowMoreReviews}>
+            <Button variant="outline" className="mt-4 border-white/40 text-white hover:bg-white/10 hover:border-white" onClick={handleShowMoreReviews}>
               Ver Mais Avaliações no Google
             </Button>
           </div>
@@ -357,6 +567,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Guia Interativo de Cortes */}
+      <MeatCutsGuide />
       
       {/* CTA Section */}
       <section id="cta" className="py-24 bg-primary/10">
@@ -372,7 +585,7 @@ const Index = () => {
             <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={handleWhatsAppClick}>
               Fazer Reserva via WhatsApp
             </Button>
-            <Button size="lg" variant="outline" onClick={() => scrollToSection("menu-section")}>
+            <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:border-white" onClick={() => scrollToSection("menu-section")}>
               Ver Cardápio
             </Button>
           </div>
