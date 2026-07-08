@@ -2,9 +2,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { useReservation } from "../contexts/ReservationContext";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { openModal } = useReservation();
 
   const handleSmoothScroll = (id) => {
     // Check if we're on the home page
@@ -60,7 +62,7 @@ const Navbar: React.FC = () => {
             Local
           </Link>
           <button
-            onClick={() => window.open("https://wa.me/551936711191?text=Olá! Gostaria de fazer uma reserva no Novo Tempero Gaúcho.", "_blank")}
+            onClick={openModal}
             className="bg-primary px-4 py-2 rounded-md text-white text-sm uppercase hover:bg-accent transition-colors"
           >
             Reserva
@@ -100,7 +102,7 @@ const Navbar: React.FC = () => {
               </Link>
               <button
                 onClick={() => {
-                  window.open("https://wa.me/551936711191?text=Olá! Gostaria de fazer uma reserva no Novo Tempero Gaúcho.", "_blank");
+                  openModal();
                   setIsOpen(false);
                 }}
                 className="bg-primary px-4 py-2 rounded-md text-white text-sm uppercase hover:bg-accent transition-colors inline-block w-fit"

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { ChevronRight, ChevronLeft, CalendarHeart, Briefcase, Heart, Utensils, CheckCircle2 } from "lucide-react";
+import { addReservation } from "../utils/reservations";
 
-const ReservationForm: React.FC = () => {
+interface ReservationFormProps {
+  onComplete?: () => void;
+}
+
+const ReservationForm: React.FC<ReservationFormProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     guests: "2",
@@ -36,9 +41,19 @@ const ReservationForm: React.FC = () => {
     const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : formData.date;
   
     const phoneNumber = "551936711191";
+    // Salvar reserva no "banco de dados" (localStorage simulado)
+    addReservation({
+      name: formData.name,
+      phone: formData.phone,
+      date: formattedDate,
+      time: formData.time,
+      guests: formData.guests,
+      occasion: formData.occasion,
+      message: formData.message,
+    });
   
     // Mensagem formatada
-    const text = `\uD83D\uDCCC *NOVA RESERVA VIP* \uD83D\uDCCC\n`
+    const text = `\uD83C\uDF7D\uFE0F *SOLICITAÇÃO DE RESERVA* \uD83C\uDF7D\uFE0F\n`
       + `----------------------------------\n`
       + `\uD83D\uDC64 *Nome:* ${formData.name}\n`
       + `\uD83D\uDCDE *Telefone:* ${formData.phone}\n`
@@ -53,6 +68,10 @@ const ReservationForm: React.FC = () => {
     const encodedText = encodeURIComponent(text);
     const url = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedText}`;
     window.open(url, "_blank");
+
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   return (

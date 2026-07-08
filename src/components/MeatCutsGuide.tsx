@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Info, Flame, ChefHat } from 'lucide-react';
 import { BoiCortesSVG } from './BoiCortesSVG';
+import EmberParticles from './EmberParticles';
 
 type Cut = {
   id: string;
@@ -229,8 +230,8 @@ const MeatCutsGuide: React.FC = () => {
   const [activeCut, setActiveCut] = useState<Cut | null>(null);
 
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-b from-black via-background to-transparent" />
+    <section className="section-padding bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none" />
       <div className="absolute -left-[20%] top-[20%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       
       <div className="container-custom relative z-10">
@@ -245,23 +246,35 @@ const MeatCutsGuide: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row gap-12 items-center">
           
-          {/* Diagrama SVG do Boi */}
+          {/* Diagrama SVG do Boi com Efeitos */}
           <div className="w-full lg:w-3/5 relative group">
-            <div className="relative rounded-3xl overflow-hidden border border-white/5 bg-black/30 backdrop-blur-sm">
-              <BoiCortesSVG 
-                activeCutId={activeCut?.id} 
-                onCutHover={(id) => {
-                  const cut = cuts.find((c) => c.id === id);
-                  if (cut) setActiveCut(cut);
-                }} 
-                onCutLeave={() => {
-                  setActiveCut(null);
-                }}
-                onCutClick={(id) => {
-                  const cut = cuts.find((c) => c.id === id);
-                  if (cut) setActiveCut(cut);
-                }}
-              />
+            <div className="relative rounded-3xl overflow-hidden border border-white/5 bg-black/30 backdrop-blur-sm min-h-[300px] flex items-center justify-center">
+              
+              {/* Brilho Radial Suave (Spotlight) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[100px] rounded-full pointer-events-none z-0" />
+
+              {/* Partículas de Brasa Restritas a esta área */}
+              <div className="absolute inset-0 z-0 opacity-100">
+                <EmberParticles />
+              </div>
+
+              {/* SVG do Boi */}
+              <div className="relative z-10 w-full">
+                <BoiCortesSVG 
+                  activeCutId={activeCut?.id} 
+                  onCutHover={(id) => {
+                    const cut = cuts.find((c) => c.id === id);
+                    if (cut) setActiveCut(cut);
+                  }} 
+                  onCutLeave={() => {
+                    setActiveCut(null);
+                  }}
+                  onCutClick={(id) => {
+                    const cut = cuts.find((c) => c.id === id);
+                    if (cut) setActiveCut(cut);
+                  }}
+                />
+              </div>
             </div>
           </div>
 

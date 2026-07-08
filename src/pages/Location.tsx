@@ -4,7 +4,7 @@ import { MapPin, Clock, Phone, Mail } from "lucide-react";
 
 const Location = () => {
   return (
-    <div className="bg-background min-h-screen pt-32 pb-24">
+    <div className="bg-background min-h-screen pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container-custom">
         <div className="text-center mb-16">
           <p className="text-primary tracking-widest uppercase text-sm font-bold mb-3">Onde nos Encontrar</p>

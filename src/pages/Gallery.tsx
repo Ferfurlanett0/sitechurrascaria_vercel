@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { getGallery, GalleryImage } from "../utils/galleryData";
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+
+  useEffect(() => {
+    setGalleryImages(getGallery());
+  }, []);
 
   // Bloquear scroll do body quando o lightbox estiver aberto
   useEffect(() => {
@@ -15,17 +21,6 @@ const Gallery = () => {
       document.body.style.overflow = "auto";
     };
   }, [selectedImage]);
-
-  const galleryImages = [
-    { id: 0, src: "/img/batatafrita.jpeg", alt: "Churrasco on grill" },
-    { id: 1, src: "/img/img1.jpeg", alt: "Traditional Brazilian dish" },
-    { id: 2, src: "/img/img11.jpeg", alt: "Restaurant interior" },
-    { id: 3, src: "/img/linguica.jpg", alt: "Chefs preparing food" },
-    { id: 4, src: "/img/fraldinha.jpg", alt: "Fraldinha suculenta" },
-    { id: 5, src: "/img/parte 1 interior.jpg", alt: "Interior do restaurante" },
-    { id: 6, src: "/img/parte 2 interior.jpg", alt: "Ambiente do restaurante" },
-    { id: 7, src: "/img/restaurante hd.jpg", alt: "Visão geral do restaurante" },
-  ];
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -51,10 +46,10 @@ const Gallery = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImage]);
+  }, [selectedImage, galleryImages.length]);
 
   return (
-    <div className="bg-background min-h-screen pt-32 pb-24">
+    <div className="bg-background min-h-screen pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container-custom">
         <div className="text-center mb-16">
           <p className="text-primary tracking-widest uppercase text-sm font-bold mb-3">Conheça o Espaço</p>
@@ -89,7 +84,7 @@ const Gallery = () => {
       </div>
 
       {/* Lightbox Overlay */}
-      {selectedImage !== null && (
+      {selectedImage !== null && galleryImages.length > 0 && (
         <div 
           className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center"
           onClick={() => setSelectedImage(null)}

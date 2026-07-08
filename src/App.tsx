@@ -10,12 +10,16 @@ import Location from "./pages/Location";
 import Gallery from "./pages/Gallery";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
+import Admin from "./pages/Admin";
+
+import { ReservationProvider } from "./contexts/ReservationContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <ReservationProvider>
+      <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -26,10 +30,12 @@ const App = () => (
             <Route path="/location" element={<Location />} />
             <Route path="/gallery" element={<Gallery />} />
           </Route>
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </TooltipProvider>
+      </TooltipProvider>
+    </ReservationProvider>
   </QueryClientProvider>
 );
 

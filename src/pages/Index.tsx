@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import EmberParticles from "../components/EmberParticles";
 import MeatCutsGuide from "../components/MeatCutsGuide";
+import { useReservation } from "../contexts/ReservationContext";
 
 const TOTAL_FRAMES = 40;
 const frameUrls = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
@@ -150,6 +151,7 @@ const Index = () => {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const aboutRef = useRef<HTMLElement>(null);
+  const { openModal } = useReservation();
 
   // Verifica se o restaurante está aberto (Segunda a Sábado, 11:00 às 14:00)
   const agora = new Date();
@@ -163,9 +165,6 @@ const Index = () => {
     }
   }, []);
 
-  const handleWhatsAppClick = () => {
-    window.open("https://wa.me/551936711191?text=Olá! Gostaria de fazer uma reserva no Novo Tempero Gaúcho.", "_blank");
-  };
   const scrollToSection = id => {
     const element = document.getElementById(id);
     if (element) {
@@ -258,7 +257,7 @@ const Index = () => {
             <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={() => scrollToSection("menu-section")}>
               Ver Cardápio
             </Button>
-            <Button size="lg" variant="outline" className="border-white/60 text-white hover:bg-white/10 hover:border-white" onClick={handleWhatsAppClick}>
+            <Button size="lg" variant="outline" className="border-white/60 text-white hover:bg-white/10 hover:border-white" onClick={openModal}>
               Fazer Reserva
             </Button>
           </div>
@@ -272,7 +271,7 @@ const Index = () => {
       </section>
       
       {/* A Arte do Tempero Gaúcho (Diferenciais) */}
-      <section className="py-24 bg-secondary relative overflow-hidden">
+      <section className="section-padding bg-secondary relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
         <div className="container-custom relative z-10">
           <div className="text-center mb-16">
@@ -326,7 +325,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background pointer-events-none z-[1]" />
         
         {/* Conteúdo sobreposto */}
-        <div className="container-custom relative z-10 py-32">
+        <div className="container-custom relative z-10 py-16 md:py-32">
           <div className="max-w-xl">
             <h2 className="text-primary tracking-widest uppercase text-sm font-bold mb-4">Nossa História</h2>
             <h3 className="heading-lg mb-8 text-white">Uma Tradição de Sabor e Qualidade</h3>
@@ -361,7 +360,7 @@ const Index = () => {
       </section>
       
       {/* Menu Highlights Section */}
-      <section id="menu-section" className="py-24 bg-secondary text-white">
+      <section id="menu-section" className="section-padding bg-secondary text-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="heading-md mb-4 text-primary">Especialidades</h2>
@@ -426,7 +425,7 @@ const Index = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-background">
+      <section id="testimonials" className="section-padding bg-background">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="heading-md mb-4 text-primary">Avaliações</h2>
@@ -522,7 +521,7 @@ const Index = () => {
       </section>
       
       {/* Location & Hours Section */}
-      <section id="location" className="py-24 bg-secondary text-white">
+      <section id="location" className="section-padding bg-secondary text-white">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -554,8 +553,8 @@ const Index = () => {
                 </div>
               </div>
               
-              <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={handleWhatsAppClick}>
-                Fazer Reserva via WhatsApp
+              <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={openModal}>
+                Fazer Reserva
               </Button>
             </div>
             
@@ -572,7 +571,7 @@ const Index = () => {
       <MeatCutsGuide />
       
       {/* CTA Section */}
-      <section id="cta" className="py-24 bg-primary/10">
+      <section id="cta" className="section-padding bg-primary/10">
         <div className="container-custom text-center">
           <h2 className="heading-lg mb-6 max-w-3xl mx-auto">
             Experimente a Autêntica Gastronomia Gaúcha
@@ -582,8 +581,8 @@ const Index = () => {
             Reserve sua mesa hoje!
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={handleWhatsAppClick}>
-              Fazer Reserva via WhatsApp
+            <Button size="lg" className="bg-primary hover:bg-accent text-white" onClick={openModal}>
+              Fazer Reserva
             </Button>
             <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:border-white" onClick={() => scrollToSection("menu-section")}>
               Ver Cardápio

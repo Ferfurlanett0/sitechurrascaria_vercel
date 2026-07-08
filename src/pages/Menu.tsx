@@ -1,9 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Utensils, Flame, Beef, Clock, CheckCircle2 } from "lucide-react";
+import { useReservation } from "../contexts/ReservationContext";
+import { getMenu, MenuItem } from "../utils/menuData";
 
 const Menu = () => {
+  const { openModal } = useReservation();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+  useEffect(() => {
+    setMenuItems(getMenu());
+  }, []);
+
+  const buffetItems = menuItems.filter(item => item.category === 'Buffet');
+  const marmitexItems = menuItems.filter(item => item.category === 'Marmitex');
+  const carnesItems = menuItems.filter(item => item.category === 'Carnes');
+  const pratosItems = menuItems.filter(item => item.category === 'Pratos');
+
+  const renderMenuItems = (items: MenuItem[]) => {
+    return items.map((item, index) => (
+      <div key={item.id} className={`border-b border-white/10 pb-6 ${index === items.length - 1 ? 'last:border-0 last:pb-0' : ''}`}>
+        <div className="flex justify-between items-baseline mb-2">
+          <h3 className="text-xl font-bold text-white tracking-wide flex items-center gap-2">
+            {item.name} {item.highlight && <CheckCircle2 size={16} className="text-primary" />}
+          </h3>
+          <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
+          <span className="text-2xl font-playfair text-primary font-bold">
+            {item.price.replace('/kg', '')}
+            {item.price.includes('/kg') && <span className="text-sm text-muted-foreground font-sans">/kg</span>}
+          </span>
+        </div>
+        <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+      </div>
+    ));
+  };
+
   return (
-    <div className="bg-background min-h-screen pt-24 pb-12">
+    <div className="bg-background min-h-screen pt-24 pb-12 md:section-padding">
       {/* Header Cinematográfico */}
       <div className="relative w-full h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden mb-16">
         <div 
@@ -26,77 +58,40 @@ const Menu = () => {
           <div className="space-y-12">
             
             {/* Buffet Section */}
-            <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
-              
-              <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary/20 p-3 rounded-xl">
-                  <Utensils className="text-primary" size={28} />
-                </div>
-                <h2 className="text-3xl font-playfair text-white font-bold">Buffet</h2>
-              </div>
-              
-              <div className="space-y-8">
-                <div className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Buffet Completo</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$41,90</span>
+            {buffetItems.length > 0 && (
+              <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
+                
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="bg-primary/20 p-3 rounded-xl">
+                    <Utensils className="text-primary" size={28} />
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Buffet à vontade com variedade de saladas, acompanhamentos, pratos quentes e carne assada à vontade.</p>
+                  <h2 className="text-3xl font-playfair text-white font-bold">Buffet</h2>
                 </div>
                 
-                <div className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Almoço por Kilo</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$89,99<span className="text-sm text-muted-foreground font-sans">/kg</span></span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Monte seu prato com nossas opções variadas e pague pelo peso exato.</p>
+                <div className="space-y-8">
+                  {renderMenuItems(buffetItems)}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Marmitex Section */}
-            <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
-              
-              <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary/20 p-3 rounded-xl">
-                  <Clock className="text-primary" size={28} />
-                </div>
-                <h2 className="text-3xl font-playfair text-white font-bold">Marmitex</h2>
-              </div>
-              
-              <div className="space-y-8">
-                <div className="border-b border-white/10 pb-6">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Marmitex Pequeno</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$20,00</span>
+            {marmitexItems.length > 0 && (
+              <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
+                
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="bg-primary/20 p-3 rounded-xl">
+                    <Clock className="text-primary" size={28} />
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Arroz, feijão ou feijoada, macarrão, farofa, refogado de legumes e carne de churrasco misto (porco, boi e frango).</p>
+                  <h2 className="text-3xl font-playfair text-white font-bold">Marmitex</h2>
                 </div>
                 
-                <div className="border-b border-white/10 pb-6">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Marmitex Médio</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$23,00</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Arroz, feijão ou feijoada, macarrão, farofa, refogado de legumes e carne de churrasco misto.</p>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide flex items-center gap-2">Marmitex Grande <CheckCircle2 size={16} className="text-primary" /></h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$28,00</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Arroz, feijão/feijoada, macarrão, farofa, legumes, carne de churrasco misto e salada fresca.</p>
+                <div className="space-y-8">
+                  {renderMenuItems(marmitexItems)}
                 </div>
               </div>
-            </div>
+            )}
 
           </div>
 
@@ -104,59 +99,40 @@ const Menu = () => {
           <div className="space-y-12">
             
             {/* Carnes Section */}
-            <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
-              
-              <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary/20 p-3 rounded-xl">
-                  <Flame className="text-primary" size={28} />
-                </div>
-                <h2 className="text-3xl font-playfair text-white font-bold">Carnes Nobres</h2>
-              </div>
-              
-              <div className="space-y-8">
-                <div className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Carne Assada (Buffet)</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-lg font-bold text-white/80">Incluso no Buffet</span>
+            {carnesItems.length > 0 && (
+              <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
+                
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="bg-primary/20 p-3 rounded-xl">
+                    <Flame className="text-primary" size={28} />
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Cortes nobres de carnes bovinas e suínas, assadas lentamente na brasa, servidas à vontade.</p>
+                  <h2 className="text-3xl font-playfair text-white font-bold">Carnes Nobres</h2>
                 </div>
                 
-                <div className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Carne Assada por Kilo</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$99,99<span className="text-sm text-muted-foreground font-sans">/kg</span></span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Escolha qualquer tipo de carne disponível na churrasqueira do dia e leve para saborear. A carne é servida em uma marmita, pesando apenas a quantidade escolhida.</p>
+                <div className="space-y-8">
+                  {renderMenuItems(carnesItems)}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Prato Feito Section */}
-            <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
-              
-              <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary/20 p-3 rounded-xl">
-                  <Beef className="text-primary" size={28} />
-                </div>
-                <h2 className="text-3xl font-playfair text-white font-bold">Prato Feito</h2>
-              </div>
-              
-              <div className="space-y-8">
-                <div>
-                  <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-wide">Prato Executivo</h3>
-                    <div className="flex-grow border-b border-dashed border-white/20 mx-4" />
-                    <span className="text-2xl font-playfair text-primary font-bold">R$29,90</span>
+            {pratosItems.length > 0 && (
+              <div className="bg-secondary/40 backdrop-blur-md rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden group hover:border-primary/30 transition-colors duration-500">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors duration-500" />
+                
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="bg-primary/20 p-3 rounded-xl">
+                    <Beef className="text-primary" size={28} />
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">Acompanha um prato quente caprichado, uma generosa porção de salada e um suculento prato de carne assada à sua escolha.</p>
+                  <h2 className="text-3xl font-playfair text-white font-bold">Prato Feito</h2>
+                </div>
+                
+                <div className="space-y-8">
+                  {renderMenuItems(pratosItems)}
                 </div>
               </div>
-            </div>
+            )}
             
             {/* CTA Final */}
             <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">
@@ -165,7 +141,7 @@ const Menu = () => {
                 <p className="text-white/70 text-sm">Faça sua reserva ou venha nos visitar hoje mesmo.</p>
               </div>
               <button 
-                onClick={() => window.location.href = '/location'}
+                onClick={openModal}
                 className="whitespace-nowrap px-8 py-3 bg-primary text-white rounded-lg font-bold hover:bg-accent transition-colors shadow-lg hover:shadow-primary/20"
               >
                 Fazer Reserva
@@ -180,4 +156,3 @@ const Menu = () => {
 };
 
 export default Menu;
-
